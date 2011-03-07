@@ -67,7 +67,7 @@ static PHP_METHOD(MHBenchmark, elapsed_time)
 {
 	zval *object = getThis();
 	zval **markers;
-	char *point1, *point2;
+	char *point1 = NULL, *point2 = NULL;
 	size_t point1_len = 0, point2_len = 0;
 	long decimals = 4;
 	HashTable *hash;
@@ -76,7 +76,7 @@ static PHP_METHOD(MHBenchmark, elapsed_time)
 		RETURN_STRING("", 1);
 	}
 
-	if (point1_len == 0) {
+	if (point1 == NULL) {
 		RETURN_STRING("{elapsed_time}", 1);
 	}
 
@@ -87,6 +87,11 @@ static PHP_METHOD(MHBenchmark, elapsed_time)
 	hash = Z_ARRVAL_PP(markers);
 	if (!zend_hash_exists(hash, point1, point1_len + 1)) {
 		RETURN_STRING("", 1);
+	}
+
+	if (point2 == NULL) {
+		point2 = "";
+		point2_len = 0;
 	}
 
 	if (!zend_hash_exists(hash, point2, point2_len + 1)) {
