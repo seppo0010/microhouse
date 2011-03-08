@@ -1,6 +1,10 @@
 #ifndef PHP_MICROHOUSE_H
 #define PHP_MICROHOUSE_H 1
 
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 #define PHP_MICROHOUSE_VERSION "unstable"
 #define PHP_MICROHOUSE_EXTNAME "MicroHouse"
 
@@ -28,9 +32,15 @@ PHP_FUNCTION(remove_invisible_characters);
 */
 /* End Common */
 
-typedef struct microhouse_singletons {
+ZEND_BEGIN_MODULE_GLOBALS(microhouse)
 	void *controller;
-} microhouse_singletons;
+ZEND_END_MODULE_GLOBALS(microhouse)
+
+#ifdef ZTS
+#define MH(v) TSRMG(microhouse_globals_id, zend_microhouse_globals *, v)
+#else
+#define MH(v) (microhouse_globals.v)
+#endif
 
 void *microhouse_get_controller(TSRMLS_D);
 void microhouse_set_controller(void *controller TSRMLS_DC);
