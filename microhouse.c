@@ -9,7 +9,8 @@
 
 #include "ext/standard/php_versioning.h"
 
-static microhouse_singletons *singletons = NULL;;
+ZEND_DECLARE_MODULE_GLOBALS(microhouse);
+
 static function_entry microhouse_functions[] = {
 	PHP_FE(microhouse_version, NULL)
 	PHP_FE(is_php, NULL)
@@ -71,25 +72,22 @@ PHP_MSHUTDOWN_FUNCTION(microhouse)
 
 PHP_RINIT_FUNCTION(microhouse)
 {
-	singletons = emalloc(sizeof(microhouse_singletons));
-	singletons->controller = NULL;
+	MH(controller) = NULL;
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(microhouse)
 {
-	if (singletons->controller)
+	if (MH(controller))
 	{
-		Z_DELREF_P((zval*)singletons->controller);
+		Z_DELREF_P((zval*)MH(controller));
 	}
-	efree(singletons);
-
 	return SUCCESS;
 }
 
 void *microhouse_get_controller(TSRMLS_D)
 {
-	return singletons->controller;
+	return MH(controller);
 }
 
 void microhouse_set_controller(void *controller TSRMLS_DC)
@@ -97,10 +95,10 @@ void microhouse_set_controller(void *controller TSRMLS_DC)
 	if (controller) {
 		Z_ADDREF_P(controller);
 	}
-	if (singletons->controller) {
-		Z_DELREF_P(singletons->controller);
+	if (MH(controller)) {
+		Z_DELREF_P(MH(controller));
 	}
-	singletons->controller = controller;
+	MH(controller) = controller;
 }
 
 PHP_FUNCTION(microhouse_version)
