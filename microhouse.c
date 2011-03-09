@@ -16,9 +16,8 @@ static function_entry microhouse_functions[] = {
 	PHP_FE(is_php, NULL)
 	PHP_FE(mh_load_class, NULL)
 	PHP_FE(mh_register_class, NULL)
-/*
-	PHP_FE(is_really_writable, NULL)
 	PHP_FE(is_loaded, NULL)
+/*
 	PHP_FE(get_config, NULL)
 	PHP_FE(config_item, NULL)
 	PHP_FE(show_error, NULL)
@@ -27,6 +26,7 @@ static function_entry microhouse_functions[] = {
 	PHP_FE(set_status_header, NULL)
 	PHP_FE(_exception_handler, NULL)
 	PHP_FE(remove_invisible_characters, NULL)
+	PHP_FE(is_really_writable, NULL)
 */
 	{NULL, NULL, NULL}
 };
@@ -76,6 +76,8 @@ PHP_RINIT_FUNCTION(microhouse)
 	MH(controller) = NULL;
 	ALLOC_HASHTABLE(MH(classes));
 	zend_hash_init(MH(classes), 10, NULL, NULL, 0);
+	ALLOC_HASHTABLE(MH(is_loaded));
+	zend_hash_init(MH(is_loaded), 10, NULL, NULL, 0);
 	return SUCCESS;
 }
 
@@ -87,6 +89,8 @@ PHP_RSHUTDOWN_FUNCTION(microhouse)
 	}
 	zend_hash_destroy(MH(classes));
 	FREE_HASHTABLE(MH(classes));
+	zend_hash_destroy(MH(is_loaded));
+	FREE_HASHTABLE(MH(is_loaded));
 	return SUCCESS;
 }
 
@@ -136,6 +140,31 @@ PHP_FUNCTION(is_php)
 	RETURN_BOOL(result);
 }
 
+static void add_loaded(char *class, int class_len TSRMLS_DC)
+{
+	char *lowername = emalloc(sizeof(char) * (1+class_len));
+	int i;
+	for (i = 0; i < class_len; ++i) {
+		if (class[i] >= 'A' && class[i] <= 'Z') {
+			lowername[i] = class[i] + 'a' - 'A';	
+		} else {
+			lowername[i] = class[i];
+		}
+ 	}
+	lowername[class_len] = '\0';
+
+	zval *val;
+	MAKE_STD_ZVAL(val);
+	ZVAL_STRINGL(val, class, class_len, 1);
+	zend_hash_add(MH(is_loaded), lowername, class_len + 1, &val, sizeof(zval*), NULL);
+	efree(lowername);
+}
+
+static HashTable *is_loaded(TSRMLS_D)
+{
+	return MH(is_loaded);
+}
+
 PHP_FUNCTION(mh_load_class)
 {
 	char *file = NULL;
@@ -168,6 +197,7 @@ PHP_FUNCTION(mh_register_class)
 		RETURN_NULL();
 	}
 
+	add_loaded(file, file_len);
 	if (strcasecmp("controller", file) == 0) {
 		microhouse_set_controller(obj TSRMLS_CC);
 		RETURN_NULL();
@@ -175,4 +205,25 @@ PHP_FUNCTION(mh_register_class)
 
 	zend_hash_add(MH(classes), file, file_len + 1, &obj, sizeof(zval*), NULL);
 	RETURN_NULL();
+}
+
+PHP_FUNCTION(is_loaded)
+{
+	char *class = NULL;
+	int class_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &class, &class_len) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (class != NULL) {
+		add_loaded(class, class_len TSRMLS_CC);
+	}
+
+	HashTable *hash = is_loaded(TSRMLS_C);
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+	array_init(ret);
+	*Z_ARRVAL_P(ret) = *hash;
+	RETURN_ZVAL(ret, 1, 0);
 }

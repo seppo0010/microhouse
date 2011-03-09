@@ -19,9 +19,8 @@ PHP_FUNCTION(microhouse_version);
 PHP_FUNCTION(is_php);
 PHP_FUNCTION(mh_load_class);
 PHP_FUNCTION(mh_register_class);
-/*
-PHP_FUNCTION(is_really_writable);
 PHP_FUNCTION(is_loaded);
+/*
 PHP_FUNCTION(get_config);
 PHP_FUNCTION(config_item);
 PHP_FUNCTION(show_error);
@@ -30,12 +29,14 @@ PHP_FUNCTION(log_message);
 PHP_FUNCTION(set_status_header);
 PHP_FUNCTION(_exception_handler);
 PHP_FUNCTION(remove_invisible_characters);
+PHP_FUNCTION(is_really_writable);
 */
 /* End Common */
 
 ZEND_BEGIN_MODULE_GLOBALS(microhouse)
 	void *controller;
 	HashTable *classes;
+	HashTable *is_loaded;
 ZEND_END_MODULE_GLOBALS(microhouse)
 
 #ifdef ZTS
