@@ -14,9 +14,10 @@ ZEND_DECLARE_MODULE_GLOBALS(microhouse);
 static function_entry microhouse_functions[] = {
 	PHP_FE(microhouse_version, NULL)
 	PHP_FE(is_php, NULL)
+	PHP_FE(mh_load_class, NULL)
+	PHP_FE(mh_register_class, NULL)
 /*
 	PHP_FE(is_really_writable, NULL)
-	PHP_FE(load_class, NULL)
 	PHP_FE(is_loaded, NULL)
 	PHP_FE(get_config, NULL)
 	PHP_FE(config_item, NULL)
@@ -73,6 +74,8 @@ PHP_MSHUTDOWN_FUNCTION(microhouse)
 PHP_RINIT_FUNCTION(microhouse)
 {
 	MH(controller) = NULL;
+	ALLOC_HASHTABLE(MH(classes));
+	zend_hash_init(MH(classes), 10, NULL, NULL, 0);
 	return SUCCESS;
 }
 
@@ -82,6 +85,8 @@ PHP_RSHUTDOWN_FUNCTION(microhouse)
 	{
 		Z_DELREF_P((zval*)MH(controller));
 	}
+	zend_hash_destroy(MH(classes));
+	FREE_HASHTABLE(MH(classes));
 	return SUCCESS;
 }
 
@@ -129,4 +134,45 @@ PHP_FUNCTION(is_php)
 	int result = php_version_compare(PHP_VERSION, version) >= 0;
 	zend_hash_add(&_is_php, version, version_len + 1, &result, sizeof(int*), NULL);
 	RETURN_BOOL(result);
+}
+
+PHP_FUNCTION(mh_load_class)
+{
+	char *file = NULL;
+	int file_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (strcasecmp("controller", file) == 0) {
+		zval* z = (zval*)microhouse_get_controller(TSRMLS_C);
+		RETURN_ZVAL(z, 0, 0);
+	}
+
+	if (zend_hash_exists(MH(classes), file, file_len + 1)) {
+		zval **ret;
+		zend_hash_find(MH(classes), file, file_len + 1, (void **) &ret);
+		RETURN_ZVAL(*ret, 0, 0);
+	}
+	RETURN_NULL();
+}
+
+PHP_FUNCTION(mh_register_class)
+{
+	zval *obj;
+	char *file = NULL;
+	int file_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &file, &file_len, &obj) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (strcasecmp("controller", file) == 0) {
+		microhouse_set_controller(obj TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	zend_hash_add(MH(classes), file, file_len + 1, &obj, sizeof(zval*), NULL);
+	RETURN_NULL();
 }
