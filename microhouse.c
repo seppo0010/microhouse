@@ -19,8 +19,8 @@ static function_entry microhouse_functions[] = {
 	PHP_FE(is_loaded, NULL)
 	PHP_FE(mh_get_config, NULL)
 	PHP_FE(mh_set_config, NULL)
-/*
 	PHP_FE(config_item, NULL)
+/*
 	PHP_FE(show_error, NULL)
 	PHP_FE(show_404, NULL)
 	PHP_FE(log_message, NULL)
@@ -61,6 +61,7 @@ PHP_MINIT_FUNCTION(microhouse)
 	mhcontroller_init(TSRMLS_C);
 
 	zend_hash_init(&_is_php, 4, NULL, NULL, 1);
+	config = NULL;
 
 	return SUCCESS;
 }
@@ -250,3 +251,24 @@ PHP_FUNCTION(mh_set_config)
 	MAKE_STD_ZVAL(config);
 	MAKE_COPY_ZVAL(&_config, config);
 }
+
+PHP_FUNCTION(config_item)
+{
+	char *item = NULL;
+	int item_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &item, &item_len) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (config == NULL) RETURN_NULL();
+
+	HashTable *aht = HASH_OF(config);
+
+	if (zend_hash_exists(aht, item, item_len + 1)) {
+		zval **ret;
+		zend_hash_find(aht, item, item_len + 1, (void **) &ret);
+		RETURN_ZVAL(*ret, 1, 0);
+	}
+}
+

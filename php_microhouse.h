@@ -22,8 +22,8 @@ PHP_FUNCTION(mh_register_class);
 PHP_FUNCTION(is_loaded);
 PHP_FUNCTION(mh_get_config);
 PHP_FUNCTION(mh_set_config);
-/*
 PHP_FUNCTION(config_item);
+/*
 PHP_FUNCTION(show_error);
 PHP_FUNCTION(show_404);
 PHP_FUNCTION(log_message);
