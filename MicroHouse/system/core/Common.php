@@ -96,7 +96,6 @@
 */
 	function &load_class($class, $directory = 'libraries', $prefix = 'CI_')
 	{
-echo 'load ' . $class , "\n";
 		$ret = mh_load_class($class);
 		if ($ret !== NULL)
 		{
