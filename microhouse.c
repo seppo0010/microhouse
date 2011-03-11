@@ -159,7 +159,7 @@ static void add_loaded(char *class, int class_len TSRMLS_DC)
 	zval *val;
 	MAKE_STD_ZVAL(val);
 	ZVAL_STRINGL(val, class, class_len, 1);
-	zend_hash_add(MH(is_loaded), lowername, class_len + 1, &val, sizeof(zval**), NULL);
+	zend_hash_add(MH(is_loaded), lowername, class_len + 1, &val, sizeof(zval*), NULL);
 	efree(lowername);
 }
 
@@ -206,7 +206,8 @@ PHP_FUNCTION(mh_register_class)
 		RETURN_NULL();
 	}
 
-	zend_hash_add(MH(classes), file, file_len + 1, &obj, sizeof(zval**), NULL);
+	Z_ADDREF_P(obj);
+	zend_hash_add(MH(classes), file, file_len + 1, &obj, sizeof(zval*), NULL);
 	RETURN_NULL();
 }
 
