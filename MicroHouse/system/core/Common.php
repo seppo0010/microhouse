@@ -145,10 +145,7 @@ echo 'load ' . $class , "\n";
 		is_loaded($class);
 
 		$ret = new $name();
-echo 'register ' . $class , "\n";
 		mh_register_class($class, $ret);
-echo 'load ' . $class , "\n";
-var_dump(mh_load_class($class)==$ret);
 		return $ret;
 	}
 

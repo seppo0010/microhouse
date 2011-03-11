@@ -97,7 +97,6 @@
  * ------------------------------------------------------
  */
 	$BM =& load_class('Benchmark', 'core');
-var_dump(1);
 	$BM->mark('total_execution_time_start');
 	$BM->mark('loading_time:_base_classes_start');
 
@@ -121,6 +120,7 @@ var_dump(1);
  * ------------------------------------------------------
  */
 	$CFG =& load_class('Config', 'core');
+var_dump($CFG);
 
 	// Do we have any manually set config items in the index.php file?
 	if (isset($assign_to_config))
