@@ -185,7 +185,7 @@ PHP_FUNCTION(mh_load_class)
 	if (zend_hash_exists(MH(classes), file, file_len + 1)) {
 		zval **ret;
 		zend_hash_find(MH(classes), file, file_len + 1, (void **) &ret);
-		RETURN_ZVAL(*ret, 0, 0);
+		RETURN_ZVAL(*ret, 1, 0);
 	}
 	RETURN_NULL();
 }
