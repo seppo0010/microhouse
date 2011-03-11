@@ -159,7 +159,7 @@ static void add_loaded(char *class, int class_len TSRMLS_DC)
 	zval *val;
 	MAKE_STD_ZVAL(val);
 	ZVAL_STRINGL(val, class, class_len, 1);
-	zend_hash_add(MH(is_loaded), lowername, class_len + 1, &val, sizeof(zval*), NULL);
+	zend_hash_add(MH(is_loaded), lowername, class_len + 1, &val, sizeof(zval**), NULL);
 	efree(lowername);
 }
 
@@ -206,7 +206,7 @@ PHP_FUNCTION(mh_register_class)
 		RETURN_NULL();
 	}
 
-	zend_hash_add(MH(classes), file, file_len + 1, &obj, sizeof(zval*), NULL);
+	zend_hash_add(MH(classes), file, file_len + 1, &obj, sizeof(zval**), NULL);
 	RETURN_NULL();
 }
 
@@ -259,6 +259,10 @@ PHP_FUNCTION(config_item)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &item, &item_len) == FAILURE) {
 		RETURN_NULL();
+	}
+
+	if (strcmp(item, "subclass_prefix") == 0) {
+		RETURN_STRINGL("MH", sizeof("MH")-1, 1); // expect not need this in the future
 	}
 
 	if (config == NULL) RETURN_NULL();
