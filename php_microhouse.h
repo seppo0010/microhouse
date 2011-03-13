@@ -44,6 +44,10 @@ ZEND_BEGIN_MODULE_GLOBALS(microhouse)
 	char *fcpath;
 	char *sysdir;
 	char *apppath;
+	char *log_path;
+	long log_threshold;
+	int log_enabled;
+	char *log_date_format;
 ZEND_END_MODULE_GLOBALS(microhouse)
 
 #ifdef ZTS
@@ -51,6 +55,8 @@ ZEND_END_MODULE_GLOBALS(microhouse)
 #else
 #define MH(v) (microhouse_globals.v)
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(microhouse)
 
 void *microhouse_get_controller(TSRMLS_D);
 void microhouse_set_controller(void *controller TSRMLS_DC);

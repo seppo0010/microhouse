@@ -4,6 +4,7 @@
 
 #include "php.h"
 #include "php_microhouse.h"
+#include "log.h"
 #include "benchmark.h"
 #include "controller.h"
 
@@ -66,13 +67,19 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("microhouse.fcpath", NULL, PHP_INI_SYSTEM, OnUpdateString, fcpath, zend_microhouse_globals, microhouse_globals)
 	STD_PHP_INI_ENTRY("microhouse.sysdir", NULL, PHP_INI_SYSTEM, OnUpdateString, sysdir, zend_microhouse_globals, microhouse_globals)
 	STD_PHP_INI_ENTRY("microhouse.apppath", NULL, PHP_INI_SYSTEM, OnUpdateString, apppath, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.log_path", NULL, PHP_INI_ALL, OnUpdateString, log_path, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.log_threshold", "0", PHP_INI_ALL, OnUpdateLong, log_threshold, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.log_enabled", "0", PHP_INI_ALL, OnUpdateBool, log_enabled, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.log_date_format", NULL, PHP_INI_ALL, OnUpdateString, log_date_format, zend_microhouse_globals, microhouse_globals)
 PHP_INI_END()
 
 static HashTable _is_php;
 static zval *config;
+
 PHP_MINIT_FUNCTION(microhouse)
 {
 	REGISTER_INI_ENTRIES();
+	mhlog_init(TSRMLS_C);
 	mhbenchmark_init(TSRMLS_C);
 	mhcontroller_init(TSRMLS_C);
 
@@ -148,6 +155,11 @@ PHP_GINIT_FUNCTION(microhouse)
 	microhouse_globals->fcpath = NULL;
 	microhouse_globals->sysdir = NULL;
 	microhouse_globals->apppath = NULL;
+	microhouse_globals->log_path = NULL;
+	microhouse_globals->log_threshold = 0;
+	microhouse_globals->log_enabled = 0;
+	microhouse_globals->log_date_format = NULL;
+
 }
 
 void *microhouse_get_controller(TSRMLS_D)
