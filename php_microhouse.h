@@ -38,6 +38,12 @@ ZEND_BEGIN_MODULE_GLOBALS(microhouse)
 	void *controller;
 	HashTable *classes;
 	HashTable *is_loaded;
+	char *self;
+	char *ext;
+	char *basepath;
+	char *fcpath;
+	char *sysdir;
+	char *apppath;
 ZEND_END_MODULE_GLOBALS(microhouse)
 
 #ifdef ZTS

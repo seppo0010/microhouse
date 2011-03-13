@@ -1,4 +1,13 @@
 <?php
+/**
+ *
+ * Modified by MicroHouse
+ *
+ * A replacement of CodeIgniter library written as a PHP module.
+ *
+ */
+// ------------------------------------------------------------------------
+
 
 /*
  *---------------------------------------------------------------
@@ -121,6 +130,7 @@
  *  Now that we know the path, set the main path constants
  * -------------------------------------------------------------------
  */
+/*  Coment when microhouse constants are defined
 	// The name of THIS file
 	define('SELF', pathinfo(__FILE__, PATHINFO_BASENAME));
 

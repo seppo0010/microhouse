@@ -7,9 +7,11 @@
 #include "benchmark.h"
 #include "controller.h"
 
+#include "zend_constants.h"
 #include "ext/standard/php_versioning.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(microhouse);
+static PHP_GINIT_FUNCTION(microhouse);
 
 static function_entry microhouse_functions[] = {
 	PHP_FE(microhouse_version, NULL)
@@ -46,22 +48,60 @@ zend_module_entry microhouse_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_MICROHOUSE_VERSION,
 #endif
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(microhouse),
+	PHP_GINIT(microhouse),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_MICROHOUSE
 ZEND_GET_MODULE(microhouse)
 #endif
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("microhouse.self", NULL, PHP_INI_SYSTEM, OnUpdateString, self, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.ext", ".php", PHP_INI_SYSTEM, OnUpdateString, ext, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.basepath", NULL, PHP_INI_SYSTEM, OnUpdateString, basepath, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.fcpath", NULL, PHP_INI_SYSTEM, OnUpdateString, fcpath, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.sysdir", NULL, PHP_INI_SYSTEM, OnUpdateString, sysdir, zend_microhouse_globals, microhouse_globals)
+	STD_PHP_INI_ENTRY("microhouse.apppath", NULL, PHP_INI_SYSTEM, OnUpdateString, apppath, zend_microhouse_globals, microhouse_globals)
+PHP_INI_END()
+
 static HashTable _is_php;
 static zval *config;
 PHP_MINIT_FUNCTION(microhouse)
 {
+	REGISTER_INI_ENTRIES();
 	mhbenchmark_init(TSRMLS_C);
 	mhcontroller_init(TSRMLS_C);
 
 	zend_hash_init(&_is_php, 4, NULL, NULL, 1);
 	config = NULL;
+
+	if (MH(self)) {
+		REGISTER_STRING_CONSTANT("SELF", MH(self), CONST_CS | CONST_PERSISTENT);
+	}
+
+	if (MH(ext)) {
+		REGISTER_STRING_CONSTANT("EXT", MH(ext), CONST_CS | CONST_PERSISTENT);
+	}
+
+	if (MH(basepath)) {
+		REGISTER_STRING_CONSTANT("BASEPATH", MH(basepath), CONST_CS | CONST_PERSISTENT);
+	}
+
+	if (MH(fcpath)) {
+		REGISTER_STRING_CONSTANT("FCPATH", MH(fcpath), CONST_CS | CONST_PERSISTENT);
+	}
+
+	if (MH(sysdir)) {
+		REGISTER_STRING_CONSTANT("SYSDIR", MH(sysdir), CONST_CS | CONST_PERSISTENT);
+	}
+
+	if (MH(apppath)) {
+		REGISTER_STRING_CONSTANT("APPPATH", MH(apppath), CONST_CS | CONST_PERSISTENT);
+	}
 
 	return SUCCESS;
 }
@@ -70,6 +110,8 @@ PHP_MSHUTDOWN_FUNCTION(microhouse)
 {
 	HashTable *ht = &_is_php;
 	zend_hash_destroy(ht);
+
+	UNREGISTER_INI_ENTRIES();
 
 	return SUCCESS;
 }
@@ -81,6 +123,7 @@ PHP_RINIT_FUNCTION(microhouse)
 	zend_hash_init(MH(classes), 10, NULL, NULL, 0);
 	ALLOC_HASHTABLE(MH(is_loaded));
 	zend_hash_init(MH(is_loaded), 10, NULL, NULL, 0);
+
 	return SUCCESS;
 }
 
@@ -95,6 +138,16 @@ PHP_RSHUTDOWN_FUNCTION(microhouse)
 	zend_hash_destroy(MH(is_loaded));
 	FREE_HASHTABLE(MH(is_loaded));
 	return SUCCESS;
+}
+
+PHP_GINIT_FUNCTION(microhouse)
+{
+	microhouse_globals->self = NULL;
+	microhouse_globals->ext = NULL;
+	microhouse_globals->basepath = NULL;
+	microhouse_globals->fcpath = NULL;
+	microhouse_globals->sysdir = NULL;
+	microhouse_globals->apppath = NULL;
 }
 
 void *microhouse_get_controller(TSRMLS_D)
