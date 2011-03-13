@@ -7,7 +7,7 @@ Makefile.objects
 acinclude.m4
 aclocal.m4
 autom4te.cache/
-benchmark.lo
+*.lo
 build/
 config.guess
 config.h
@@ -18,12 +18,10 @@ config.status
 config.sub
 configure
 configure.in
-controller.lo
 install-sh
 libtool
 ltmain.sh
 microhouse.la
-microhouse.lo
 missing
 mkinstalldirs
 modules/
